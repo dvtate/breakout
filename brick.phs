@@ -1,0 +1,45 @@
+
+# Rows have 14 bricks each
+{ I32 I32 I32 I32 I32 I32 I32  I32 I32 I32 I32 I32 I32 I32 } pack class $Row =
+
+# Brick color values
+0x0 $Row.Brick.Gone =
+0xFF0000 $Row.Brick.Red =
+0x00FF00 $Row.Brick.Green =
+0x0000FF $Row.Brick.Blue =
+
+# Bricks are 12x25 + 2px of padding
+2 $Row.Brick.Gap =
+25 $Row.Brick.Width =
+12 $Row.Brick.Height =
+
+{ # Create a row filled with a value
+    $v =
+    { v v v v v v v  v v v v v v v } pack Row make
+} $Row.make_fill =
+
+{ # Update item
+    { $value $i $row } =
+    row unpack { $v0 $v1 $v2 $v3 $v4 $v5 $v6 $v7 $v8 $v9 $v10 $v11 $v12 $v13 } =
+    { i is_const ! } { "index must be constant" :error } $branch fun
+    { i 0 == } { { value v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 value v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 value v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 value v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 value v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 value v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 value v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 value v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 value v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 value v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 value v11 v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 value v12 v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 value v13 } pack Row make } $branch fun
+    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 value } pack Row make } $branch fun
+} $Row.update_item =
+
+{ # 6 blank rows and
+    Row Row Row  Row Row Row
+    Row Row Row Row  Row Row Row Row
+} pack $Level =
+
