@@ -1,10 +1,7 @@
-"../postfix-haskell/planning/stdlib/prelude.phs" include use
-"../postfix-haskell/planning/stdlib/str.phs" include use
-"../postfix-haskell/planning/stdlib/math.phs" include use
-"../postfix-haskell/planning/stdlib/bits.phs" include use
+"./node_modules/postfix-haskell/planning/stdlib/prelude.phs" include use
+"./node_modules/postfix-haskell/planning/stdlib/bits.phs" include use
 
-
-{
+{ # Compile-time debugging macro
     "(() => {
         let v = ctx.pop();
         let ret = [];
@@ -26,19 +23,17 @@
     })()" :eval
 } $:semi_build =
 
-
-
-# Cucked game monad
+# This is a hack
 Void class $Game =
+
+# Runtime debugging to console
+{ Game I32 } { Game } Arrow { "js" "console.log" } import $log =
+{ Game I32 I32 I32 I32 } { Game } Arrow { "js" "console.log" } import $log_4_i32 =
+{ Game I32 I32 } { Game } Arrow { "js" "console.log" } import $log_2_i32 =
 
 # Game dimensions
 400 $width =
 500 $height =
-
-# the wall width takes up the remaining space of the canvas width. with 14 bricks
-# and 13 2px gaps between them, thats: 400 - (14 * 25 + 2 * 13) = 24px. so each
-# wall will be 12px
-#12 $wallSize =
 
 { # Detect collision between 2 rectangles
     {   $x1 $y1 $w1 $h1
@@ -88,7 +83,6 @@ Void class $Game =
 
     # No collisions
     { true } {
-        #555003 log
         x dx +
         y dy +
         dx
@@ -100,7 +94,6 @@ Void class $Game =
         x dx + y dy + Ball.Width Ball.Height
         rect_collide
     } {
-        #555002 log
         # Note ball placed above paddle
         x dx +
         Paddle.Y Ball.Height -
@@ -110,14 +103,12 @@ Void class $Game =
 
     # Detect collision with walls
     { x dx + 0 <= x dx + width Ball.Width - >= || } {
-        #555001 log
         x dx -
         y dy +
         0 dx -
         dy
     } $branch fun
     { y dy + 0 <= } {
-        #555000 log
         x dx +
         y dy -
         dx
@@ -126,10 +117,7 @@ Void class $Game =
 
     # Doesn't like runtime tuples - work around:
     branch { $x2 $y2 $dx2 $dy2 } =
-    { x2 y2 dx2 dy2 } pack Ball make $ret =
-
-    #ret unpack log_4_i32
-    ret
+    { x2 y2 dx2 dy2 } pack Ball make
 } $Ball.update fun
 
 # Brick constants
@@ -184,11 +172,7 @@ Void class $Game =
     ball paddle
 } $Game.draw =
 
-{ Game I32 } { Game } Arrow { "js" "console.log" } import $log =
-{ Game I32 I32 I32 I32 } { Game } Arrow { "js" "console.log" } import $log_4_i32 =
-{ Game I32 I32 } { Game } Arrow { "js" "console.log" } import $log_2_i32 =
-
-{
+{ # Update game state
     # Capture state
     { $ball $paddle } =
 
@@ -219,16 +203,18 @@ Void class $Game =
 } $Game.set_state =
 
 { # Main loop
-
-    {Game} {Game} Arrow "call $draw" _asm
-    {Game} {Game} Arrow "call $update" _asm
+    # Draw and update
+    Game.get_state
+    Game.draw
+    Game.update
+    Game.set_state
 
     # Await next frame
     { Game } { Game } Arrow { "js" "nextFrame" } import @
 } $Game.loop =
 
-{
-    { width 2 / 300 1 1 } pack Ball make
+{ # Start things out in the right place
+    { width 2 / Ball.Width 2 / - 300 1 1 } pack Ball make
     { width 2 / Brick.Width 2 / - 0 } pack Paddle make
     Game.set_state
 } $Game.init =
@@ -247,13 +233,6 @@ Void class $Game =
     Game.draw
     pop pop
 } $draw export
-
-{ Game } { # Stop moving the paddle
-    Game.get_state
-    $paddle =
-    { paddle unpack pop 0 } pack Paddle make
-    Game.set_state
-} $arrow_up export
 
 { Game } {
     Game.get_state
@@ -277,3 +256,11 @@ Void class $Game =
     { paddle unpack pop 0 Paddle.Speed - } pack Paddle make
     Game.set_state
 } $arrow_left_down export
+
+{ Game } { # Stop moving the paddle
+    # TODO better handle 2 finger overlap
+    Game.get_state
+    $paddle =
+    { paddle unpack pop 0 } pack Paddle make
+    Game.set_state
+} $arrow_up export
