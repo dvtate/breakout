@@ -3,6 +3,31 @@
 "../postfix-haskell/planning/stdlib/math.phs" include use
 "../postfix-haskell/planning/stdlib/bits.phs" include use
 
+
+{
+    "(() => {
+        let v = ctx.pop();
+        let ret = [];
+        while (v) {
+            const n = v.instr || v.name;
+            ret.push(`${v.constructor.name}${n ? ': ' + n : ''}`);
+            if (v.value)
+                v = v.value;
+            else if (v.args && v.args[0])
+                v = v.args[0];
+            else if (v.source)
+                v = v.source;
+            else {
+                ret.push(v);
+                v = null;
+            }
+        }
+        return ret.reverse();
+    })()" :eval
+} $:semi_build =
+
+
+
 # Cucked game monad
 Void class $Game =
 
@@ -30,18 +55,17 @@ Void class $Game =
 
 { I32 I32 } pack class $Paddle =
 
-# TODO momentum based controls
-1 $Paddle.Speed =
+3 $Paddle.Speed =
 440 $Paddle.Y =
 
 { type Paddle == } { unpack pop } $Paddle.position fun
 { type Paddle == } { unpack swap pop } $Paddle.speed fun
 { type Paddle == } {
     unpack { $p $s } =
+    p s + $moved =
     { true } { p } $pos fun
-    { p 0 >  p width Brick.Width - < && } { p s + } $pos fun
-    pos $p2 =
-    { p2 s } pack Paddle make
+    { moved 0 >  moved width Brick.Width - < && } { moved } $pos fun
+    { pos s } pack Paddle make
 } $Paddle.update fun
 
 ##
@@ -50,8 +74,6 @@ Void class $Game =
 { I32 I32 I32 I32 } pack class $Ball =
 10 $Ball.Width =
 10 $Ball.Height =
-
-# Getters
 { type Ball == } { unpack { $x $y $dx $dy } = x  } $Ball.x fun
 { type Ball == } { unpack { $x $y $dx $dy } = y  } $Ball.y fun
 { type Ball == } { unpack { $x $y $dx $dy } = dx } $Ball.dx fun
@@ -62,36 +84,52 @@ Void class $Game =
     # Aliasing
     { $paddle $ball } =
     ball unpack { $x $y $dx $dy } =
-    paddle Paddle.position $pp =
+    paddle unpack { $p $_ } =
 
     # No collisions
-    { true } { y dx dy } $branch fun
+    { true } {
+        #555003 log
+        x dx +
+        y dy +
+        dx
+        dy
+    } $branch fun
 
     # Detect collision with paddle
-    {   pp Paddle.Y Brick.Width Brick.Height
-        x y Ball.Width Ball.Height
+    {   p Paddle.Y Brick.Width Brick.Height
+        x dx + y dy + Ball.Width Ball.Height
         rect_collide
-        false
     } {
-        #555000 log
+        #555002 log
         # Note ball placed above paddle
-        Paddle.Y Ball.Height - dx 0 dy -
+        x dx +
+        Paddle.Y Ball.Height -
+        dx
+        0 dy -
     } $branch fun
 
     # Detect collision with walls
     { x dx + 0 <= x dx + width >= || } {
         #555001 log
-        y 0 dx - dy
+        x dx -
+        y dy +
+        0 dx -
+        dy
     } $branch fun
     { y dy + 0 <= } {
-        #555003 log
-        y dx 0 dy -
+        #555000 log
+        x dx +
+        y dy -
+        dx
+        0 dy -
     } $branch fun
-    branch
 
-    # Move ball
-    { $y1 $dx1 $dy1 } =
-    { x dx1 + y1 dy1 + dx1 dy1 } pack Ball make
+    # Doesn't like runtime tuples - work around:
+    branch { $x2 $y2 $dx2 $dy2 } =
+    { x2 y2 dx2 dy2 } pack Ball make $ret =
+
+    #ret unpack log_4_i32
+    ret
 } $Ball.update fun
 
 # Brick constants
@@ -165,7 +203,7 @@ Void class $Game =
     paddle2 ball Ball.update $ball2 =
 
     #ball2 unpack log_4_i32
-
+    #ball2 Ball.dy :semi_build
     ball2 paddle2
     #paddle2 ball Ball.update $ball2 =
     #ball paddle2
@@ -194,31 +232,12 @@ Void class $Game =
     {Game} {Game} Arrow "call $draw" _asm
     {Game} {Game} Arrow "call $update" _asm
 
-    # dup "(() => {
-    #     let v = ctx.pop();
-    #     let ret = [];
-    #     while (v) {
-    #         ret.push(`${v.constructor.name}${v.instr && (': ' + v.instr) || ''}`);
-    #         if (v.value)
-    #             v = v.value;
-    #         else if (v.args && v.args[0])
-    #             v = v.args[0];
-    #         else if (v.source)
-    #             v = v.source;
-    #         else {
-    #             ret.push(v);
-    #             v = null;
-    #         }
-    #     }
-    #     return ret.reverse();
-    # })()" :eval
-
     # Await next frame
     { Game } { Game } Arrow { "js" "nextFrame" } import @
 } $Game.loop =
 
 {
-    { 300 width 2 / 1 1 } pack Ball make
+    { width 2 / 300 1 1 } pack Ball make
     { width 2 / Brick.Width 2 / - 0 } pack Paddle make
     Game.set_state
 } $Game.init =
@@ -245,7 +264,14 @@ Void class $Game =
     Game.set_state
 } $arrow_up export
 
-{ Game } {} $space_down export
+{ Game } {
+    Game.get_state
+    { $ball $paddle } =
+    ball unpack { $x $y $dx $dy } =
+    { width 2 / Ball.Width 2 / - 300 1 2 } pack Ball make
+    paddle
+    Game.set_state
+} $space_down export
 
 { Game } {
     Game.get_state

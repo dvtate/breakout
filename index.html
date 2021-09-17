@@ -62,7 +62,7 @@
                         },
 
                         nextFrame() {
-                            setTimeout(() => requestAnimationFrame(mod.instance.exports.loop), 100);
+                            requestAnimationFrame(mod.instance.exports.loop);
                         },
                     },
                 });
@@ -85,13 +85,11 @@
                 document.addEventListener('keydown', function(e) {
                     if (e.which === 37) {
                         arrow_left_down();
-                        console.log('left');
-                    }
-                    else if (e.which === 39) {
+                        // console.log('left');
+                    }else if (e.which === 39) {
                         arrow_right_down();
-                        console.log('right');
-                    }
-                    else if (e.which === 32) {
+                        // console.log('right');
+                    } else if (e.which === 32) {
                         space_down();
                         console.log('space');
                     }
@@ -99,8 +97,10 @@
 
                 // Listen to keyboard events to stop the paddle if key is released
                 document.addEventListener('keyup', function(e) {
-                    if (e.which === 37 || e.which === 39)
+                    if (e.which === 37 || e.which === 39) {
                         arrow_up();
+                        console.log('keyup', e.which);
+                    }
                 });
 
                 // Start game loop
