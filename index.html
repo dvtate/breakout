@@ -36,6 +36,7 @@
                         window,
                         canvas,
                         context,
+                        'console.log': console.log,
                         getString(addr, len) {
                             const str = new Uint8Array(
                                 mod.instance.exports.memory.buffer,
@@ -61,13 +62,18 @@
                         },
 
                         nextFrame() {
-                            requestAnimationFrame(mod.instance.exports.loop);
+                            setTimeout(() => requestAnimationFrame(mod.instance.exports.loop), 100);
                         },
                     },
                 });
                 window.mod = mod;
                 window.canvas = canvas;
                 window.context = context;
+                window.showMem = () => {
+                    const arr = [...new Uint32Array(mod.instance.exports.memory.buffer)].slice(0,15)
+                    console.log('ball', arr.slice(0, 4));
+                    console.log('paddle', arr.slice(4, 6));
+                };
 
                 // Get exports
                 const { loop, arrow_left_down, arrow_right_down, arrow_up, space_down, init }

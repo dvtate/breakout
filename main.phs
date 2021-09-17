@@ -1,6 +1,4 @@
 "../postfix-haskell/planning/stdlib/prelude.phs" include use
-"../postfix-haskell/planning/stdlib/io.phs" include use
-"../postfix-haskell/planning/stdlib/monad.phs" include use
 "../postfix-haskell/planning/stdlib/str.phs" include use
 "../postfix-haskell/planning/stdlib/math.phs" include use
 "../postfix-haskell/planning/stdlib/bits.phs" include use
@@ -39,15 +37,11 @@ Void class $Game =
 { type Paddle == } { unpack pop } $Paddle.position fun
 { type Paddle == } { unpack swap pop } $Paddle.speed fun
 { type Paddle == } {
-    $paddle =
-    { true } { paddle Paddle.position } $branch fun
-    { paddle unpack { $p $s } =
-        s 0 >   p width Brick.Width - < &&
-        s 0 <   p 0 >                   &&  ||
-    } {
-        paddle unpack +
-    } $branch fun
-    { branch paddle Paddle.speed } pack Paddle make
+    unpack { $p $s } =
+    { true } { p } $pos fun
+    { p 0 >  p width Brick.Width - < && } { p s + } $pos fun
+    pos $p2 =
+    { p2 s } pack Paddle make
 } $Paddle.update fun
 
 ##
@@ -74,39 +68,33 @@ Void class $Game =
     { true } { y dx dy } $branch fun
 
     # Detect collision with paddle
-    {   # pp Paddle.Y Brick.Width Brick.Height
-        # x y Ball.Width Ball.Height
-        # rect_collide
+    {   pp Paddle.Y Brick.Width Brick.Height
+        x y Ball.Width Ball.Height
+        rect_collide
         false
     } {
+        #555000 log
         # Note ball placed above paddle
         Paddle.Y Ball.Height - dx 0 dy -
     } $branch fun
 
     # Detect collision with walls
-    { x dx + 0 <= } { y 0 dx - dy } $branch fun
-    { x dx + width >= } { y 0 dx - dy } $branch fun
-    { y dy + 0 <= } { y dx 0 dy - } $branch fun
+    { x dx + 0 <= x dx + width >= || } {
+        #555001 log
+        y 0 dx - dy
+    } $branch fun
+    { y dy + 0 <= } {
+        #555003 log
+        y dx 0 dy -
+    } $branch fun
     branch
 
     # Move ball
     { $y1 $dx1 $dy1 } =
-    paddle
     { x dx1 + y1 dy1 + dx1 dy1 } pack Ball make
 } $Ball.update fun
 
-
-{ { $x $y $h $w $color } =
-    # Set fill
-    color 0xff0000 and 16 >> $r =
-    color 0xff00 and 8 >> $g =
-    color 0xff and $b =
-    r g b { Game I32 I32 I32 } { Game } Arrow { "js" "setFill" } import @
-
-    # Draw rectangle
-    x y w h { Game I32 I32 I32 I32 } { Game } Arrow { "js" "contextFillRect" } import @
-} $Game.draw_rect =
-
+# Brick constants
 2 $Brick.Gap =
 25 $Brick.Width =
 12 $Brick.Height =
@@ -119,20 +107,32 @@ Void class $Game =
 0x00ffff $Colors.Cyan =
 0xffffff $Colors.White =
 
-{
+{ # Draw Scene
     { $ball $paddle } =
+
     # Clear scene
     0 0 width height
     { Game I32 I32 I32 I32 } { Game } Arrow
     { "js" "contextClearRect" } import @
+
+    { { $x $y $h $w $color } =
+        # Set fill
+        color 0xff0000 and 16 >> $r =
+        color 0xff00 and 8 >> $g =
+        color 0xff and $b =
+        r g b { Game I32 I32 I32 } { Game } Arrow { "js" "setFill" } import @
+
+        # Draw rectangle
+        x y w h { Game I32 I32 I32 I32 } { Game } Arrow { "js" "contextFillRect" } import @
+    } $draw_rect =
 
     # Draw paddle
     paddle Paddle.position
     Paddle.Y
     Brick.Height
     Brick.Width
-    Colors.White
-    Game.draw_rect
+    Colors.Cyan
+    draw_rect
 
     # Draw ball
     ball Ball.x
@@ -140,16 +140,35 @@ Void class $Game =
     Ball.Width
     Ball.Height
     Colors.White
-    Game.draw_rect
+    draw_rect
 
-    #0 0 100 200 Colors.White Game.draw_rect
-
+    # Forward state
     ball paddle
 } $Game.draw =
 
+{ Game I32 } { Game } Arrow { "js" "console.log" } import $log =
+{ Game I32 I32 I32 I32 } { Game } Arrow { "js" "console.log" } import $log_4_i32 =
+{ Game I32 I32 } { Game } Arrow { "js" "console.log" } import $log_2_i32 =
+
 {
-    Paddle.update
-    swap Ball.update swap
+    # Get state
+    { $ball $paddle } =
+    #ball unpack log_4_i32
+    #paddle unpack log_2_i32
+    #1234 log
+
+    # Update paddle
+    paddle Paddle.update $paddle2 =
+
+    #paddle2 unpack log_2_i32
+
+    paddle2 ball Ball.update $ball2 =
+
+    #ball2 unpack log_4_i32
+
+    ball2 paddle2
+    #paddle2 ball Ball.update $ball2 =
+    #ball paddle2
 } $Game.update =
 
 # So sketchy lol
@@ -171,10 +190,28 @@ Void class $Game =
 } $Game.set_state =
 
 { # Main loop
-    Game.get_state
-    Game.update
-    Game.draw
-    Game.set_state
+
+    {Game} {Game} Arrow "call $draw" _asm
+    {Game} {Game} Arrow "call $update" _asm
+
+    # dup "(() => {
+    #     let v = ctx.pop();
+    #     let ret = [];
+    #     while (v) {
+    #         ret.push(`${v.constructor.name}${v.instr && (': ' + v.instr) || ''}`);
+    #         if (v.value)
+    #             v = v.value;
+    #         else if (v.args && v.args[0])
+    #             v = v.args[0];
+    #         else if (v.source)
+    #             v = v.source;
+    #         else {
+    #             ret.push(v);
+    #             v = null;
+    #         }
+    #     }
+    #     return ret.reverse();
+    # })()" :eval
 
     # Await next frame
     { Game } { Game } Arrow { "js" "nextFrame" } import @
@@ -186,10 +223,9 @@ Void class $Game =
     Game.set_state
 } $Game.init =
 
-{ Game } {
-    Game.loop
-} $loop export
+{ Game } { Game.loop } $loop export
 { Game } { Game.init } $init export
+
 { Game } {
     Game.get_state
     Game.update
