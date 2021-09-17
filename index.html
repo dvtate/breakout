@@ -34,13 +34,6 @@
                 const mod = await WebAssembly.instantiate(wasm, {
                     js: {
                         'console.log': console.log,
-                        getString(addr, len) {
-                            const str = new Uint8Array(
-                                mod.instance.exports.memory.buffer,
-                                len,
-                                addr);
-                            return new TextDecoder().decode(str);
-                        },
 
                         setFill(r, g, b) {
                             context.fillStyle = `rgb(${r}, ${g}, ${b})`;
