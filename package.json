@@ -4,8 +4,20 @@
   "description": "simple game using postfix haskell and wasm",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "phc file main.phs -t0 > game.wat && wat2wasm game.wat",
+    "start": "http-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dvtate/breakout"
   },
   "author": "dvtate",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "postfix-haskell": "^0.0.2",
+    "wat2wasm": "^3.0.0"
+  },
+  "dependencies": {
+    "http-server": "^13.0.2"
+  }
 }

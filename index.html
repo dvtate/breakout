@@ -19,23 +19,20 @@
             }
         </style>
     </head>
-    <body>
+    <body onclick="mod.instance.exports.loop()">
         <canvas width="400" height="500" id="game"></canvas>
 
         <script>
             (async () => {
+                // Get canvas 2d context
                 const canvas = document.getElementById('game');
                 const context = canvas.getContext('2d');
 
-                const resp = await fetch('test.wasm');
+                // Instantiate wasm
+                const resp = await fetch('game.wasm');
                 const wasm = await resp.arrayBuffer();
-
-                // Invoke WASM exports
                 const mod = await WebAssembly.instantiate(wasm, {
                     js: {
-                        window,
-                        canvas,
-                        context,
                         'console.log': console.log,
                         getString(addr, len) {
                             const str = new Uint8Array(
@@ -45,29 +42,21 @@
                             return new TextDecoder().decode(str);
                         },
 
-                        logStr(addr, len) {
-                            console.log(this.getString(addr, len));
-                        },
-
                         setFill(r, g, b) {
                             context.fillStyle = `rgb(${r}, ${g}, ${b})`;
                         },
 
-                        'contextFillRect': (...args) => {
-                            context.fillRect(...args);
-                        },
-
-                        'contextClearRect': (...args) => {
-                            context.clearRect(...args);
-                        },
+                        contextFillRect: context.fillRect.bind(context),
+                        contextClearRect: context.clearRect.bind(context),
 
                         nextFrame() {
                             requestAnimationFrame(mod.instance.exports.loop);
                         },
                     },
                 });
+
+                // Debugging
                 window.mod = mod;
-                window.canvas = canvas;
                 window.context = context;
                 window.showMem = () => {
                     const arr = [...new Uint32Array(mod.instance.exports.memory.buffer)].slice(0,15)
@@ -86,12 +75,12 @@
                     if (e.which === 37) {
                         arrow_left_down();
                         // console.log('left');
-                    }else if (e.which === 39) {
+                    } else if (e.which === 39) {
                         arrow_right_down();
                         // console.log('right');
                     } else if (e.which === 32) {
                         space_down();
-                        console.log('space');
+                        // console.log('space');
                     }
                 });
 
@@ -99,15 +88,13 @@
                 document.addEventListener('keyup', function(e) {
                     if (e.which === 37 || e.which === 39) {
                         arrow_up();
-                        console.log('keyup', e.which);
+                        // console.log('keyup', e.which);
                     }
                 });
 
                 // Start game loop
                 // loop();
                 mod.instance.exports.draw();
-
-
             })();
 
 

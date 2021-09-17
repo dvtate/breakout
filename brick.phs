@@ -23,19 +23,19 @@
     row unpack { $v0 $v1 $v2 $v3 $v4 $v5 $v6 $v7 $v8 $v9 $v10 $v11 $v12 $v13 } =
     { i is_const ! } { "index must be constant" :error } $branch fun
     { i 0 == } { { value v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 value v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 value v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 value v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 value v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 value v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 value v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 value v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 value v9 v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 value v10 v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 value v11 v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 value v12 v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 value v13 } pack Row make } $branch fun
-    { i 0 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 value } pack Row make } $branch fun
+    { i 1 == } { { v0 value v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 2 == } { { v0 v1 value v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 3 == } { { v0 v1 v2 value v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 4 == } { { v0 v1 v2 v3 value v5 v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 5 == } { { v0 v1 v2 v3 v4 value v6 v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 6 == } { { v0 v1 v2 v3 v4 v5 value v7 v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 7 == } { { v0 v1 v2 v3 v4 v5 v6 value v8 v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 8 == } { { v0 v1 v2 v3 v4 v5 v6 v7 value v9 v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 9 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 value v10 v11 v12 v13 } pack Row make } $branch fun
+    { i 10 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 value v11 v12 v13 } pack Row make } $branch fun
+    { i 11 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 value v12 v13 } pack Row make } $branch fun
+    { i 12 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 value v13 } pack Row make } $branch fun
+    { i 13 == } { { v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 value } pack Row make } $branch fun
 } $Row.update_item =
 
 { # 6 blank rows and

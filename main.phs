@@ -109,7 +109,7 @@ Void class $Game =
     } $branch fun
 
     # Detect collision with walls
-    { x dx + 0 <= x dx + width >= || } {
+    { x dx + 0 <= x dx + width Ball.Width - >= || } {
         #555001 log
         x dx -
         y dy +
@@ -189,24 +189,15 @@ Void class $Game =
 { Game I32 I32 } { Game } Arrow { "js" "console.log" } import $log_2_i32 =
 
 {
-    # Get state
+    # Capture state
     { $ball $paddle } =
-    #ball unpack log_4_i32
-    #paddle unpack log_2_i32
-    #1234 log
 
     # Update paddle
     paddle Paddle.update $paddle2 =
-
-    #paddle2 unpack log_2_i32
-
     paddle2 ball Ball.update $ball2 =
 
-    #ball2 unpack log_4_i32
-    #ball2 Ball.dy :semi_build
+    # Forward state
     ball2 paddle2
-    #paddle2 ball Ball.update $ball2 =
-    #ball paddle2
 } $Game.update =
 
 # So sketchy lol
@@ -219,12 +210,12 @@ Void class $Game =
 { # Save state to memory
     { swap 4 * swap { Game I32 I32 } { Game } Arrow "i32.store" _asm } $store_i32 =
     { $ball $paddle } =
+    4 paddle Paddle.position store_i32
+    5 paddle Paddle.speed store_i32
     0 ball Ball.x store_i32
     1 ball Ball.y store_i32
     2 ball Ball.dx store_i32
     3 ball Ball.dy store_i32
-    4 paddle Paddle.position store_i32
-    5 paddle Paddle.speed store_i32
 } $Game.set_state =
 
 { # Main loop
