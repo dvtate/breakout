@@ -4,7 +4,7 @@
   "description": "simple game using postfix haskell and wasm",
   "main": "index.js",
   "scripts": {
-    "build": "phc file main.phs -t0 > game.wat && wat2wasm game.wat",
+    "build": "phc file main.phs -t0 --fast > game.wat && wat2wasm game.wat",
     "start": "http-server"
   },
   "repository": {
